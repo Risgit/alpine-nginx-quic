@@ -7,7 +7,7 @@
 
 ```
 curl -LO https://github.com/mrnuku/alpine-nginx-quic/releases/download/v1.23.2-r0/nginx-1.23.2-r0.apk
-apk add --allow-untrusted nginx-1.23.2-r0.apk
+apk add --allow-untrusted nginx-1.23.3-r0.apk
 ```
 
 ## setup
