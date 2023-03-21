@@ -31,8 +31,8 @@ http {
 default vhost
 ```
 server {
-    listen 443 http3 reuseport;
-    listen [::]:443 http3 reuseport;
+    listen 443 quic reuseport;
+    listen [::]:443 quic reuseport;
     listen [::]:443 ssl http2 default_server;
     listen 443 ssl http2 default_server;
 }
@@ -41,8 +41,8 @@ server {
 other vhost
 ```
 server {
-    listen 443 http3;
-    listen [::]:443 http3;
+    listen 443 quic;
+    listen [::]:443 quic;
     listen [::]:443 ssl http2 ipv6only=on;
     listen 443 ssl http2;
 }
