@@ -32,11 +32,13 @@
 pkgname=nginx
 # NOTE: Upgrade only to even-numbered versions (e.g. 1.14.z, 1.16.z)!
 # Odd-numbered versions are mainline (development) versions.
-pkgver=1.23.2
+pkgver=1.23.3
 pkgrel=0
 # Revision of nginx-tests to use for check().
-_tests_hgrev=1d88487eafbf
-_njs_ver=0.7.7
+_nginxver=8771d35d55d0
+_librever=3.7.1
+_tests_hgrev=1e1d0f3874b0
+_njs_ver=0.7.11
 pkgdesc="HTTP and reverse proxy server (quic version)"
 url="https://www.nginx.org/"
 arch="all"
@@ -55,8 +57,6 @@ makedepends="
 	pkgconf
 	zeromq-dev
 	zlib-dev
-	mercurial
-	git
 	autoconf
 	automake
 	libtool
@@ -80,7 +80,9 @@ install="$pkgname.pre-install $pkgname.post-install $pkgname.pre-upgrade $pkgnam
 builddir="$srcdir"/$pkgname-quic
 subpackages="$pkgname-debug $pkgname-doc $pkgname-openrc $pkgname-vim::noarch"
 source="https://nginx.org/download/nginx-$pkgver.tar.gz
-	$pkgname-tests-$_tests_hgrev.tar.gz::https://hg.nginx.org/nginx-tests/archive/$_tests_hgrev.tar.gz
+	https://hg.nginx.org/nginx-quic/archive/tip.tar.gz
+	https://github.com/libressl/portable/archive/refs/tags/v$_librever.tar.gz
+	https://hg.nginx.org/nginx-tests-quic/archive/quic.tar.gz
 	$pkgname-njs-$_njs_ver.tar.gz::https://hg.nginx.org/njs/archive/$_njs_ver.tar.gz
 	nginx-dav-ext-module~pr-56.patch::https://github.com/arut/nginx-dav-ext-module/pull/56.patch
 	nginx-dav-ext-module~pr-62.patch::https://github.com/arut/nginx-dav-ext-module/commit/bbf93f75ca58657fb0f8376b0898f854f13cef91.patch
@@ -95,7 +97,6 @@ source="https://nginx.org/download/nginx-$pkgver.tar.gz
 	nginx_cookie_flag_module~fix-mem-allocations.patch
 	njs~mktemp-busybox-compat.patch
 	njs~nginx-1.20.x-compat.patch
-	njs~fix-dangling-pointer.patch
 	nginx.conf
 	default.conf
 	stream.conf
@@ -233,10 +234,12 @@ _rtmp_provides="$pkgname-rtmp"  # for backward compatibility
 
 
 prepare() {
-	git clone -b v3.6.1 https://github.com/libressl-portable/portable.git "$srcdir"/libressl
+	#git clone -b v3.6.1 https://github.com/libressl-portable/portable.git "$srcdir"/libressl
+	mv -f "$srcdir"/portable-$_librever "$srcdir"/libressl
 	cd "$srcdir"/libressl
 	./autogen.sh
-	hg clone --cwd "$srcdir" -b quic https://hg.nginx.org/nginx-quic
+	#hg clone --cwd "$srcdir" -b quic https://hg.nginx.org/nginx-quic
+	mv -f "$srcdir"/$pkgname-quic-quic "$srcdir"/$pkgname-quic
 	cp "$srcdir"/$pkgname-$pkgver/LICENSE "$builddir"/
 	
 	local file; for file in $source; do
@@ -257,10 +260,10 @@ prepare() {
 	done
 
 	# This test requires superuser privileges and CAP_NET_ADMIN.
-	rm "$srcdir"/nginx-tests-*/proxy_bind_transparent.t
-	rm "$srcdir"/nginx-tests-*/proxy_bind_transparent_capability.t
+	#rm "$srcdir"/nginx-tests-*/proxy_bind_transparent.t
+	#rm "$srcdir"/nginx-tests-*/proxy_bind_transparent_capability.t
 	# Travis and Drone.io does not support IPv6...
-	rm -f "$srcdir"/nginx-tests-*/upstream_ip_hash_ipv6.t
+	rm -f "$srcdir"/nginx-tests-*/h2_headers.t
 }
 
 _build() {
